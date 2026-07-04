@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>SUMMIT LOG 図解仕様書</title>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@700;800&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0C1220; --surface:#121C30; --surface2:#182642; --line:#243350;
+  --text:#E8EEF5; --muted:#8493A8; --glacier:#7FD8E8; --lamp:#E8A852; --danger:#E87070;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Zen Kaku Gothic New',-apple-system,sans-serif;background:var(--ink);color:var(--text);
+  padding:32px 18px 80px;max-width:760px;margin:0 auto;line-height:1.8}
+h1{font-family:'Shippori Mincho',serif;font-size:24px;font-weight:800;letter-spacing:.1em}
+h1 small{display:block;font-family:'Zen Kaku Gothic New',sans-serif;font-size:11px;font-weight:500;color:var(--muted);letter-spacing:.25em;margin-top:6px}
+.ver{display:inline-block;margin-top:10px;font-size:11px;color:var(--ink);background:var(--glacier);
+  padding:3px 12px;border-radius:99px;font-weight:700;letter-spacing:.1em}
+h2{font-family:'Shippori Mincho',serif;font-size:17px;font-weight:700;color:var(--glacier);
+  letter-spacing:.12em;margin:52px 0 6px;padding-top:20px;border-top:1px solid var(--line)}
+h2::before{content:attr(data-n);font-size:12px;color:var(--lamp);margin-right:10px;letter-spacing:.2em}
+.lead{font-size:12px;color:var(--muted);margin-bottom:20px}
+
+/* ---- diagram primitives ---- */
+.diagram{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:20px 16px;margin:14px 0}
+.box{background:var(--surface2);border:1px solid var(--line);border-radius:12px;
+  padding:12px 14px;text-align:center;font-size:13px;font-weight:700}
+.box small{display:block;font-size:10px;font-weight:400;color:var(--muted);margin-top:3px;line-height:1.6}
+.box.hi{border-color:var(--glacier);box-shadow:0 0 12px rgba(127,216,232,.15)}
+.box.ext{border-style:dashed;color:var(--muted)}
+.box.store{border-color:var(--lamp)}
+.arrow{display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:11px;
+  padding:6px 0;letter-spacing:.05em}
+.arrow::before{content:"↓";color:var(--glacier);font-size:16px;margin-right:8px}
+.arrow.up::before{content:"↑";color:var(--lamp)}
+.arrow.both::before{content:"↕";color:var(--lamp)}
+.cols{display:flex;gap:10px}
+.cols>*{flex:1}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.note{font-size:11px;color:var(--muted);margin-top:10px;line-height:1.8;padding-left:14px;position:relative}
+.note::before{content:"※";position:absolute;left:0;color:var(--lamp)}
+
+/* screen flow */
+.tabbar{display:flex;gap:6px;background:var(--ink);border:1px solid var(--line);border-radius:12px;padding:6px;margin-bottom:14px}
+.tabbar span{flex:1;text-align:center;font-size:10px;font-weight:700;padding:8px 2px;border-radius:8px;color:var(--muted)}
+.tabbar span.on{background:var(--glacier);color:var(--ink)}
+.flowline{border-left:2px dashed var(--line);margin-left:18px;padding:2px 0 2px 18px}
+.flowline .box{text-align:left;margin:8px 0}
+
+/* data model */
+.entity{border:1px solid var(--glacier);border-radius:12px;overflow:hidden;font-size:11px}
+.entity header{background:rgba(127,216,232,.12);padding:8px 12px;font-weight:700;font-size:12px;letter-spacing:.08em}
+.entity div{padding:5px 12px;border-top:1px solid var(--line);display:flex;justify-content:space-between}
+.entity div b{font-weight:500}
+.entity div span{color:var(--muted)}
+.entity.amber{border-color:var(--lamp)}
+.entity.amber header{background:rgba(232,168,82,.12)}
+.rel{display:flex;align-items:center;justify-content:center;gap:8px;color:var(--lamp);font-size:11px;padding:10px 0;letter-spacing:.1em}
+
+/* book structure */
+.bookflow .box{text-align:left}
+.indent1{margin-left:22px}
+.indent2{margin-left:44px}
+
+/* export table */
+table{width:100%;border-collapse:collapse;font-size:11px;margin:14px 0}
+th,td{border:1px solid var(--line);padding:9px 10px;text-align:left;line-height:1.7}
+th{background:var(--surface2);color:var(--glacier);font-weight:700;letter-spacing:.05em;white-space:nowrap}
+td b{color:var(--lamp);font-weight:700}
+
+/* legend */
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:10px;color:var(--muted);margin-top:14px}
+.legend i{display:inline-block;width:22px;height:12px;border-radius:4px;margin-right:5px;vertical-align:-2px;border:1px solid var(--line);background:var(--surface2)}
+.legend .l-hi i{border-color:var(--glacier)}
+.legend .l-store i{border-color:var(--lamp)}
+.legend .l-ext i{border-style:dashed}
+footer{margin-top:60px;text-align:center;font-size:10px;color:var(--muted);letter-spacing:.15em}
+@media(max-width:520px){.grid2{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<h1>SUMMIT LOG<small>図解仕様書 — 中村紳一郎 遠征記録帳</small></h1>
+<span class="ver">v2.0 / 2026-07-04</span>
+
+<h2 data-n="01">システム構成図</h2>
+<p class="lead">サーバーもアカウントも不要。すべてが端末の中で完結する構成。</p>
+<div class="diagram">
+  <div class="box ext">GitHub Pages<small>index.html / sw.js / manifest.json / アイコン<br>配信のみ。データは一切保持しない</small></div>
+  <div class="arrow">初回アクセス時に取得 → 以後キャッシュ</div>
+  <div class="box hi">iPhone(Safari / PWA)<small>アプリ本体。Service Workerにより<br>機内モードでも起動・記録が可能</small></div>
+  <div class="arrow both">保存・読込</div>
+  <div class="cols">
+    <div class="box store">localStorage<small>記録テキスト<br>(summitlog.v1)</small></div>
+    <div class="box store">IndexedDB<small>写真データ<br>(photosストア)</small></div>
+  </div>
+  <div class="arrow up">オンライン時のみ利用(任意)</div>
+  <div class="cols">
+    <div class="box ext">OpenStreetMap<small>地図タイル</small></div>
+    <div class="box ext">Nominatim<small>山名→座標検索</small></div>
+    <div class="box ext">Google Fonts<small>書体</small></div>
+  </div>
+  <div class="legend">
+    <span class="l-hi"><i></i>アプリ本体</span>
+    <span class="l-store"><i></i>端末内ストレージ</span>
+    <span class="l-ext"><i></i>外部サービス(データ送信なし)</span>
+  </div>
+  <p class="note">記録・写真が外部に送信されることはない。外部通信は地図の表示・座標検索・フォント取得のみ。</p>
+</div>
+
+<h2 data-n="02">画面フロー図</h2>
+<p class="lead">下部の4タブがすべての入口。迷子にならない一層構造。</p>
+<div class="diagram">
+  <div class="tabbar">
+    <span class="on">記録一覧</span><span>＋ 記録</span><span>地図</span><span>本にする</span>
+  </div>
+  <div class="flowline">
+    <div class="box">📋 記録一覧(ホーム)<small>統計(登頂数・累計標高・国数)/ タイムライン / 検索</small></div>
+    <div class="box indent1">└ カードをタップ → 詳細モーダル<small>全文・写真の閲覧 → 「編集する」で入力画面へ</small></div>
+    <div class="box">✏️ ＋ 記録<small>日付・山名(必須)/ 天候・同行・行程 / 座標 / 写真3枚 / 本文<br>保存 → 一覧へ戻る。編集時のみ削除ボタン表示</small></div>
+    <div class="box">🌍 地図<small>座標入力済みの記録をピン表示 → ポップアップ → 詳細モーダル</small></div>
+    <div class="box">📖 本にする<small>原稿書き出し(Markdown / 縦書きPDF / テキスト / コピー)<br>バックアップの保存・復元</small></div>
+  </div>
+</div>
+
+<h2 data-n="03">データモデル図</h2>
+<p class="lead">記録と写真は分離保存。記録側はIDだけを持つ軽い構造。</p>
+<div class="diagram">
+  <div class="grid2">
+    <div class="entity">
+      <header>Entry(記録)→ localStorage</header>
+      <div><b>id</b><span>ユニークID</span></div>
+      <div><b>date</b><span>YYYY-MM-DD ✔必須</span></div>
+      <div><b>mt</b><span>山名 ✔必須</span></div>
+      <div><b>country / elev</b><span>国・標高m</span></div>
+      <div><b>wx / party / route</b><span>天候・同行・行程</span></div>
+      <div><b>lat / lng</b><span>座標(地図用)</span></div>
+      <div><b>photos[]</b><span>写真IDの配列</span></div>
+      <div><b>body</b><span>本文(原稿になる)</span></div>
+    </div>
+    <div class="entity amber">
+      <header>Photo(写真)→ IndexedDB</header>
+      <div><b>id</b><span>ユニークID</span></div>
+      <div><b>data</b><span>JPEG dataURL<br>長辺1280px / 品質0.8に自動圧縮</span></div>
+    </div>
+  </div>
+  <div class="rel">Entry 1 ─── photos[] ───→ Photo 0〜3</div>
+  <p class="note">記録の削除・写真差し替え時は、参照が切れたPhotoも自動削除される(孤児データを残さない)。</p>
+</div>
+
+<h2 data-n="04">書籍原稿の生成ロジック</h2>
+<p class="lead">日々の記録が、自動でこの章立てに組み上がる。</p>
+<div class="diagram bookflow">
+  <div class="box hi">全記録を日付の古い順に整列</div>
+  <div class="arrow"></div>
+  <div class="box"># 世界の山を歩く<small>扉:著者「中村紳一郎 遠征記録 — 全n篇」</small></div>
+  <div class="box indent1">## モンブラン(フランス / 4,808m)<small>山名が変わるたびに章が生まれる</small></div>
+  <div class="box indent2">### 2026年7月10日<small>&gt; 天候:快晴 / 同行:単独 / 行程:グーテルート</small></div>
+  <div class="box indent2">本文(記録・感想がそのまま原稿に)</div>
+  <div class="box indent2">### 2026年7月11日 …<small>同じ山の連日記録は同じ章にまとまる</small></div>
+  <div class="box indent1">## 次の山(国 / 標高)…</div>
+  <p class="note">縦書きPDFでは同じ順序で、1記録=1ページの明朝体・縦書き組版(vertical-rl)になる。</p>
+</div>
+
+<h2 data-n="05">書き出し・バックアップ一覧</h2>
+<table>
+  <tr><th>操作</th><th>出力</th><th>用途</th></tr>
+  <tr><td>書籍原稿(Markdown)</td><td>summit-log_日付.md</td><td><b>出版社持ち込み・KDP下書き</b>。章立て済み</td></tr>
+  <tr><td>縦書きの本をPDFに</td><td>印刷 → PDF保存</td><td>縦書き明朝の本の体裁。そのまま読める</td></tr>
+  <tr><td>プレーンテキスト</td><td>summit-log_日付.txt</td><td>他アプリへの流用・メール共有</td></tr>
+  <tr><td>クリップボードにコピー</td><td>—</td><td>メモアプリ等へ即貼り付け</td></tr>
+  <tr><td>完全バックアップ</td><td>summit-log_backup_日付.json</td><td><b>写真込み</b>の全データ。機種変更・復元用</td></tr>
+  <tr><td>バックアップから復元</td><td>JSON読込</td><td>ID重複は除外して統合(上書きしない)</td></tr>
+</table>
+
+<h2 data-n="06">運用フロー(紳一郎さん向け)</h2>
+<div class="diagram">
+  <div class="box hi">初回:Safariで開く → 共有 → 「ホーム画面に追加」<small>これでアプリとしてインストール完了(オフライン対応)</small></div>
+  <div class="arrow">日々</div>
+  <div class="box">山で記録する<small>短い一行でもOK。写真を3枚まで添付。電波がなくても保存できる</small></div>
+  <div class="arrow">遠征の前後</div>
+  <div class="box store">完全バックアップを保存<small>「本にする」→ JSONをiCloud Drive等へ。これが命綱</small></div>
+  <div class="arrow">記録が溜まったら</div>
+  <div class="box">原稿を書き出して、本にする<small>Markdown原稿 or 縦書きPDF</small></div>
+  <p class="note">データは端末内のみ。Safariの「履歴とデータを消去」で消えるため、バックアップの習慣だけは必須。</p>
+</div>
+
+<footer>SUMMIT LOG v2.0 — PRIORITY CREATIVE WORKS</footer>
+</body>
+</html>
