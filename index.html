@@ -5,19 +5,23 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0C1220">
 <title>SUMMIT LOG — 中村紳一郎 遠征記録帳</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700;800&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <style>
 :root{
-  --ink:#0C1220;        /* 夜の山肌 */
+  --ink:#0C1220;
   --surface:#121C30;
   --surface2:#182642;
   --line:#243350;
   --text:#E8EEF5;
   --muted:#8493A8;
-  --glacier:#7FD8E8;    /* 氷河 */
-  --lamp:#E8A852;       /* ヘッドランプ */
+  --glacier:#7FD8E8;
+  --lamp:#E8A852;
   --danger:#E87070;
   --radius:14px;
 }
@@ -29,7 +33,6 @@ body{
   min-height:100vh;
   padding-bottom:calc(90px + env(safe-area-inset-bottom));
 }
-/* ---- header ---- */
 header{
   padding:calc(20px + env(safe-area-inset-top)) 20px 0;
   background:
@@ -38,31 +41,28 @@ header{
 }
 .brand{font-family:'Shippori Mincho',serif;font-weight:800;font-size:22px;letter-spacing:.14em}
 .brand small{display:block;font-family:'Zen Kaku Gothic New',sans-serif;font-weight:500;font-size:11px;color:var(--muted);letter-spacing:.3em;margin-top:4px}
-/* ---- stats ---- */
 .stats{display:flex;gap:10px;margin:18px 0 6px}
 .stat{flex:1;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:12px 10px;text-align:center}
 .stat b{font-family:'Shippori Mincho',serif;font-size:20px;font-weight:800;color:var(--glacier);display:block}
 .stat span{font-size:10px;color:var(--muted);letter-spacing:.1em}
-/* ---- tabs ---- */
 nav{
-  position:fixed;bottom:0;left:0;right:0;z-index:50;
+  position:fixed;bottom:0;left:0;right:0;z-index:1000;
   display:flex;background:rgba(12,18,32,.92);backdrop-filter:blur(12px);
   border-top:1px solid var(--line);
-  padding:8px 8px calc(8px + env(safe-area-inset-bottom));
+  padding:8px 6px calc(8px + env(safe-area-inset-bottom));
 }
 nav button{
   flex:1;background:none;border:none;color:var(--muted);
-  font-family:inherit;font-size:11px;font-weight:700;letter-spacing:.08em;
-  padding:10px 4px;border-radius:10px;cursor:pointer;
+  font-family:inherit;font-size:11px;font-weight:700;letter-spacing:.05em;
+  padding:10px 2px;border-radius:10px;cursor:pointer;
 }
 nav button.on{color:var(--ink);background:var(--glacier)}
 main{padding:8px 20px 20px}
 .page{display:none}
 .page.on{display:block}
 h2{font-family:'Shippori Mincho',serif;font-size:16px;font-weight:700;letter-spacing:.12em;margin:16px 0 12px;color:var(--glacier)}
-/* ---- form ---- */
 label{display:block;font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.12em;margin:14px 0 6px}
-input,textarea,select{
+input,textarea{
   width:100%;background:var(--surface);border:1px solid var(--line);
   border-radius:12px;color:var(--text);font-family:inherit;font-size:16px;
   padding:12px 14px;outline:none;
@@ -78,14 +78,14 @@ textarea{min-height:170px;line-height:1.9;resize:vertical}
 }
 .btn.ghost{background:none;border:1px solid var(--line);color:var(--text);margin-top:10px}
 .btn.warn{background:none;border:1px solid var(--danger);color:var(--danger)}
-/* ---- timeline ---- */
+.btn.mini{margin-top:0;padding:12px;font-size:12px;letter-spacing:.08em}
 .search{margin-bottom:14px}
 .tl{position:relative;padding-left:26px}
 .tl::before{content:"";position:absolute;left:8px;top:6px;bottom:6px;width:2px;
   background:repeating-linear-gradient(180deg,var(--line) 0 6px,transparent 6px 11px)}
 .card{
   position:relative;background:var(--surface);border:1px solid var(--line);
-  border-radius:var(--radius);padding:14px 16px;margin-bottom:14px;cursor:pointer;
+  border-radius:var(--radius);padding:14px 16px;margin-bottom:14px;cursor:pointer;overflow:hidden;
 }
 .card::before{content:"";position:absolute;left:-23px;top:22px;width:9px;height:9px;
   border-radius:50%;background:var(--lamp);box-shadow:0 0 8px var(--lamp)}
@@ -94,18 +94,18 @@ textarea{min-height:170px;line-height:1.9;resize:vertical}
 .card .meta{font-size:12px;color:var(--glacier)}
 .card .ex{font-size:13px;color:var(--muted);margin-top:8px;line-height:1.7;
   display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.thumbs{display:flex;gap:6px;margin-top:10px}
+.thumbs img{width:64px;height:64px;object-fit:cover;border-radius:8px;border:1px solid var(--line)}
 .empty{text-align:center;color:var(--muted);padding:60px 20px;font-size:13px;line-height:2}
 .empty b{font-family:'Shippori Mincho',serif;font-size:16px;color:var(--text);display:block;margin-bottom:8px}
-/* ---- export ---- */
 .exp-desc{font-size:12px;color:var(--muted);line-height:1.9;margin-bottom:6px}
 .toast{
   position:fixed;left:50%;bottom:calc(100px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(20px);
   background:var(--glacier);color:var(--ink);font-size:13px;font-weight:700;
-  padding:10px 22px;border-radius:99px;opacity:0;transition:.25s;z-index:99;pointer-events:none;white-space:nowrap;
+  padding:10px 22px;border-radius:99px;opacity:0;transition:.25s;z-index:2000;pointer-events:none;white-space:nowrap;
 }
 .toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
-/* ---- detail modal ---- */
-.modal{position:fixed;inset:0;background:rgba(6,10,18,.75);backdrop-filter:blur(6px);z-index:80;display:none;overflow-y:auto}
+.modal{position:fixed;inset:0;background:rgba(6,10,18,.75);backdrop-filter:blur(6px);z-index:1500;display:none;overflow-y:auto}
 .modal.on{display:block}
 .sheet{background:var(--surface);border:1px solid var(--line);border-radius:20px;
   margin:calc(40px + env(safe-area-inset-top)) 16px 40px;padding:22px}
@@ -114,7 +114,46 @@ textarea{min-height:170px;line-height:1.9;resize:vertical}
 .sheet .meta{font-size:13px;color:var(--glacier);margin-bottom:4px}
 .sheet .sub{font-size:12px;color:var(--muted);margin-bottom:14px;line-height:1.8}
 .sheet .body{font-size:14px;line-height:2.1;white-space:pre-wrap;border-top:1px solid var(--line);padding-top:14px}
+.sheet .photos img{width:100%;border-radius:12px;margin-bottom:10px;border:1px solid var(--line)}
 .hidden-file{display:none}
+/* photo picker */
+.photo-grid{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.photo-grid .ph{position:relative;width:76px;height:76px}
+.photo-grid img{width:100%;height:100%;object-fit:cover;border-radius:10px;border:1px solid var(--line)}
+.photo-grid .rm{position:absolute;top:-6px;right:-6px;width:22px;height:22px;border-radius:50%;
+  background:var(--danger);color:#fff;border:none;font-size:13px;line-height:1;cursor:pointer}
+.photo-grid .add{width:76px;height:76px;border:1px dashed var(--line);border-radius:10px;
+  background:none;color:var(--muted);font-size:24px;cursor:pointer}
+/* map */
+#map{height:62vh;border-radius:var(--radius);border:1px solid var(--line);background:var(--surface)}
+.map-note{font-size:11px;color:var(--muted);line-height:1.8;margin-top:10px}
+.leaflet-container{font-family:inherit}
+.geo-row{display:flex;gap:10px;align-items:flex-end}
+.geo-row>div{flex:1}
+.geo-row button{flex:0 0 auto;width:auto;padding:12px 14px}
+/* ---- vertical-writing book (print) ---- */
+#book{display:none}
+@media print{
+  body{background:#fff;color:#000;padding:0}
+  header,main,nav,.toast,.modal{display:none !important}
+  #book{display:block}
+  #book .bookpage{
+    writing-mode:vertical-rl;
+    font-family:'Shippori Mincho',"Hiragino Mincho ProN",serif;
+    color:#000;
+    height:88vh;
+    padding:6vh 5vw;
+    page-break-after:always;
+    overflow:hidden;
+    line-height:2.3;
+    font-size:12pt;
+  }
+  #book h1{font-size:26pt;letter-spacing:.4em;margin-left:24pt;font-weight:800}
+  #book .author{font-size:13pt;letter-spacing:.3em;color:#333}
+  #book h3{font-size:16pt;margin-left:18pt;font-weight:700}
+  #book .bmeta{font-size:10pt;color:#555;margin-left:14pt}
+  #book .bbody{white-space:pre-wrap}
+}
 </style>
 </head>
 <body>
@@ -140,7 +179,7 @@ textarea{min-height:170px;line-height:1.9;resize:vertical}
     <h2 id="formTitle">新しい記録</h2>
     <input type="hidden" id="fId">
     <label>日付</label><input type="date" id="fDate">
-    <label>山名</label><input id="fMt" placeholder="例：モンブラン">
+    <label>山名</label><input id="fMt" placeholder="例:モンブラン">
     <div class="row">
       <div><label>国・地域</label><input id="fCountry" placeholder="フランス"></div>
       <div><label>標高 (m)</label><input id="fElev" type="number" inputmode="numeric" placeholder="4808"></div>
@@ -150,22 +189,39 @@ textarea{min-height:170px;line-height:1.9;resize:vertical}
       <div><label>同行者</label><input id="fParty" placeholder="単独 / 〇〇と"></div>
     </div>
     <label>ルート・行程</label><input id="fRoute" placeholder="グーテルート、往復14時間 など">
-    <label>記録・感想（そのまま本の原稿になります）</label>
+    <label>位置(地図に表示されます)</label>
+    <div class="geo-row">
+      <div><input id="fLat" type="number" step="any" inputmode="decimal" placeholder="緯度"></div>
+      <div><input id="fLng" type="number" step="any" inputmode="decimal" placeholder="経度"></div>
+      <button class="btn ghost mini" onclick="geocode()">山名から検索</button>
+    </div>
+    <label>写真(1件につき3枚まで・自動で圧縮されます)</label>
+    <div class="photo-grid" id="photoGrid"></div>
+    <input type="file" id="photoIn" class="hidden-file" accept="image/*" multiple onchange="addPhotos(event)">
+    <label>記録・感想(そのまま本の原稿になります)</label>
     <textarea id="fBody" placeholder="今日感じたこと、見た景色、苦しかったこと、出会った人。&#10;短くても毎日書くことが、いちばんの財産になります。"></textarea>
     <button class="btn" onclick="saveEntry()">記録を保存する</button>
     <button class="btn warn" id="btnDel" style="display:none" onclick="delEntry()">この記録を削除</button>
   </section>
 
+  <!-- 地図 -->
+  <section class="page" id="pageMap">
+    <h2>登頂マップ</h2>
+    <div id="map"></div>
+    <p class="map-note">位置情報を入力した記録がピンで表示されます。ピンをタップすると記録が開きます。地図は一度表示すればオフラインでも直近の範囲が見られます。</p>
+  </section>
+
   <!-- 書き出し -->
   <section class="page" id="pageExport">
     <h2>本にする・書き出す</h2>
-    <p class="exp-desc">記録を日付順にまとめて、山ごとの章立てが付いた原稿ファイルを作ります。出版社への持ち込みやKDP（Kindle出版）の下書きにそのまま使えます。</p>
-    <button class="btn" onclick="exportMd()">書籍原稿（Markdown）を書き出す</button>
+    <p class="exp-desc">記録を日付順にまとめて、山ごとの章立てが付いた原稿ファイルを作ります。</p>
+    <button class="btn" onclick="exportMd()">書籍原稿(Markdown)を書き出す</button>
+    <button class="btn ghost" onclick="printBook()">縦書きの本をPDFにする(印刷画面)</button>
     <button class="btn ghost" onclick="exportTxt()">プレーンテキストを書き出す</button>
     <button class="btn ghost" onclick="copyMd()">原稿をクリップボードにコピー</button>
     <h2 style="margin-top:34px">バックアップ</h2>
-    <p class="exp-desc">機種変更や万一に備えて、データ一式を保存・復元できます。長い遠征の前には必ずバックアップを。</p>
-    <button class="btn ghost" onclick="exportJson()">バックアップを保存（JSON）</button>
+    <p class="exp-desc">写真も含めた全データを保存・復元できます。長い遠征の前には必ずバックアップを。</p>
+    <button class="btn ghost" onclick="exportJson()">完全バックアップを保存(JSON)</button>
     <button class="btn ghost" onclick="document.getElementById('fileIn').click()">バックアップから復元</button>
     <input type="file" id="fileIn" class="hidden-file" accept=".json" onchange="importJson(event)">
   </section>
@@ -173,7 +229,8 @@ textarea{min-height:170px;line-height:1.9;resize:vertical}
 
 <nav>
   <button class="on" id="tabList" onclick="go('List')">記録一覧</button>
-  <button id="tabNew" onclick="go('New')">＋ 記録する</button>
+  <button id="tabNew" onclick="go('New')">＋ 記録</button>
+  <button id="tabMap" onclick="go('Map')">地図</button>
   <button id="tabExport" onclick="go('Export')">本にする</button>
 </nav>
 
@@ -183,36 +240,117 @@ textarea{min-height:170px;line-height:1.9;resize:vertical}
   <div class="sheet" id="sheet"></div>
 </div>
 
+<!-- 縦書き印刷用(画面には表示されない) -->
+<div id="book"></div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 const KEY='summitlog.v1';
 let entries = JSON.parse(localStorage.getItem(KEY)||'[]');
+let formPhotos = [];   // [{id, data}] photos currently in the form
+let map = null, markerLayer = null;
 
+/* ================= IndexedDB (photos) ================= */
+let db;
+function openDb(){
+  return new Promise((res,rej)=>{
+    const r = indexedDB.open('summitlog', 1);
+    r.onupgradeneeded = ()=> r.result.createObjectStore('photos', {keyPath:'id'});
+    r.onsuccess = ()=>{ db = r.result; res(); };
+    r.onerror = ()=> rej(r.error);
+  });
+}
+function dbPut(photo){ return new Promise((res,rej)=>{ const t=db.transaction('photos','readwrite'); t.objectStore('photos').put(photo); t.oncomplete=res; t.onerror=()=>rej(t.error); }); }
+function dbGet(id){ return new Promise((res)=>{ const r=db.transaction('photos').objectStore('photos').get(id); r.onsuccess=()=>res(r.result||null); r.onerror=()=>res(null); }); }
+function dbDel(id){ return new Promise((res)=>{ const t=db.transaction('photos','readwrite'); t.objectStore('photos').delete(id); t.oncomplete=res; t.onerror=res; }); }
+function dbAll(){ return new Promise((res)=>{ const r=db.transaction('photos').objectStore('photos').getAll(); r.onsuccess=()=>res(r.result||[]); r.onerror=()=>res([]); }); }
+
+/* ================= utils ================= */
 function save(){ localStorage.setItem(KEY, JSON.stringify(entries)); renderStats(); }
 function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
 function esc(s){ return (s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
 function fmtDate(d){ if(!d) return ''; const [y,m,dd]=d.split('-'); return `${y}年${+m}月${+dd}日`; }
 function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('on'); setTimeout(()=>t.classList.remove('on'),2200); }
+function stamp(){ return new Date().toISOString().slice(0,10); }
 
-/* ---- navigation ---- */
+/* ================= navigation ================= */
 function go(p){
-  ['List','New','Export'].forEach(n=>{
+  ['List','New','Map','Export'].forEach(n=>{
     document.getElementById('page'+n).classList.toggle('on', n===p);
     document.getElementById('tab'+n).classList.toggle('on', n===p);
   });
-  if(p==='New' && !document.getElementById('fId').value){
-    clearForm();
-  }
+  if(p==='New' && !document.getElementById('fId').value) clearForm();
   if(p==='List') renderList();
+  if(p==='Map') initMap();
 }
 
-/* ---- form ---- */
+/* ================= photos ================= */
+function compress(file){
+  return new Promise((res,rej)=>{
+    const img = new Image();
+    img.onload = ()=>{
+      const MAX = 1280;
+      let {width:w, height:h} = img;
+      if(Math.max(w,h) > MAX){ const k = MAX/Math.max(w,h); w=Math.round(w*k); h=Math.round(h*k); }
+      const cv = document.createElement('canvas'); cv.width=w; cv.height=h;
+      cv.getContext('2d').drawImage(img,0,0,w,h);
+      res(cv.toDataURL('image/jpeg', 0.8));
+      URL.revokeObjectURL(img.src);
+    };
+    img.onerror = rej;
+    img.src = URL.createObjectURL(file);
+  });
+}
+async function addPhotos(ev){
+  const files = [...ev.target.files].slice(0, 3 - formPhotos.length);
+  for(const f of files){
+    try{
+      const data = await compress(f);
+      formPhotos.push({id: uid(), data});
+    }catch{ toast('写真を読み込めませんでした'); }
+  }
+  ev.target.value='';
+  renderPhotoGrid();
+}
+function removePhoto(id){
+  formPhotos = formPhotos.filter(p=>p.id!==id);
+  renderPhotoGrid();
+}
+function renderPhotoGrid(){
+  const g = document.getElementById('photoGrid');
+  g.innerHTML = formPhotos.map(p=>`
+    <div class="ph"><img src="${p.data}"><button class="rm" onclick="removePhoto('${p.id}')">×</button></div>`).join('')
+    + (formPhotos.length<3 ? `<button class="add" onclick="document.getElementById('photoIn').click()">＋</button>` : '');
+}
+
+/* ================= geocoding ================= */
+async function geocode(){
+  const mt = document.getElementById('fMt').value.trim();
+  if(!mt){ toast('先に山名を入力してください'); return; }
+  toast('検索中…');
+  try{
+    const country = document.getElementById('fCountry').value.trim();
+    const q = encodeURIComponent(mt + (country?' '+country:''));
+    const r = await fetch(`https://nominatim.openstreetmap.org/search?q=${q}&format=json&limit=1`,
+      {headers:{'Accept-Language':'ja'}});
+    const j = await r.json();
+    if(!j.length){ toast('見つかりませんでした。手入力してください'); return; }
+    document.getElementById('fLat').value = (+j[0].lat).toFixed(5);
+    document.getElementById('fLng').value = (+j[0].lon).toFixed(5);
+    toast(`見つかりました:${j[0].display_name.split(',')[0]}`);
+  }catch{ toast('通信できませんでした(オフライン?)'); }
+}
+
+/* ================= form ================= */
 function clearForm(){
-  ['fId','fMt','fCountry','fElev','fWx','fParty','fRoute','fBody'].forEach(id=>document.getElementById(id).value='');
+  ['fId','fMt','fCountry','fElev','fWx','fParty','fRoute','fBody','fLat','fLng'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('fDate').value = new Date().toISOString().slice(0,10);
   document.getElementById('formTitle').textContent='新しい記録';
   document.getElementById('btnDel').style.display='none';
+  formPhotos = [];
+  renderPhotoGrid();
 }
-function saveEntry(){
+async function saveEntry(){
   const e = {
     id: document.getElementById('fId').value || uid(),
     date: document.getElementById('fDate').value,
@@ -222,14 +360,21 @@ function saveEntry(){
     wx: document.getElementById('fWx').value.trim(),
     party: document.getElementById('fParty').value.trim(),
     route: document.getElementById('fRoute').value.trim(),
+    lat: parseFloat(document.getElementById('fLat').value)||null,
+    lng: parseFloat(document.getElementById('fLng').value)||null,
     body: document.getElementById('fBody').value.trim(),
+    photos: formPhotos.map(p=>p.id),
   };
   if(!e.date || !e.mt){ toast('日付と山名は必須です'); return; }
+  // persist photos; delete ones removed during edit
+  const old = entries.find(x=>x.id===e.id);
+  if(old && old.photos) for(const pid of old.photos) if(!e.photos.includes(pid)) await dbDel(pid);
+  for(const p of formPhotos) await dbPut({id:p.id, data:p.data});
   const i = entries.findIndex(x=>x.id===e.id);
   if(i>=0) entries[i]=e; else entries.push(e);
   save(); clearForm(); go('List'); toast('保存しました');
 }
-function editEntry(id){
+async function editEntry(id){
   const e = entries.find(x=>x.id===id); if(!e) return;
   document.getElementById('modal').classList.remove('on');
   document.getElementById('fId').value=e.id;
@@ -240,32 +385,39 @@ function editEntry(id){
   document.getElementById('fWx').value=e.wx;
   document.getElementById('fParty').value=e.party;
   document.getElementById('fRoute').value=e.route;
+  document.getElementById('fLat').value=e.lat??'';
+  document.getElementById('fLng').value=e.lng??'';
   document.getElementById('fBody').value=e.body;
+  formPhotos = [];
+  for(const pid of (e.photos||[])){ const p = await dbGet(pid); if(p) formPhotos.push(p); }
+  renderPhotoGrid();
   document.getElementById('formTitle').textContent='記録を編集';
   document.getElementById('btnDel').style.display='block';
   go('New');
 }
-function delEntry(){
+async function delEntry(){
   const id = document.getElementById('fId').value;
-  if(!confirm('この記録を削除しますか？元に戻せません。')) return;
+  if(!confirm('この記録を削除しますか?元に戻せません。')) return;
+  const e = entries.find(x=>x.id===id);
+  if(e && e.photos) for(const pid of e.photos) await dbDel(pid);
   entries = entries.filter(x=>x.id!==id);
   save(); clearForm(); go('List'); toast('削除しました');
 }
 
-/* ---- list / detail ---- */
+/* ================= list / detail ================= */
 function renderStats(){
   document.getElementById('stCount').textContent = entries.length;
   document.getElementById('stElev').textContent = entries.reduce((s,e)=>s+(e.elev||0),0).toLocaleString();
   document.getElementById('stCountry').textContent = new Set(entries.map(e=>e.country).filter(Boolean)).size;
 }
-function renderList(){
+async function renderList(){
   const q = (document.getElementById('q').value||'').toLowerCase();
   const list = document.getElementById('list');
   const items = entries
     .filter(e=>!q || (e.mt+e.country+e.body+e.route).toLowerCase().includes(q))
     .sort((a,b)=>b.date.localeCompare(a.date));
   if(!items.length){
-    list.innerHTML = `<div class="empty"><b>まだ記録がありません</b>「＋ 記録する」から最初の一座を書き残しましょう。<br>短い一行でも、未来の本の一頁になります。</div>`;
+    list.innerHTML = `<div class="empty"><b>まだ記録がありません</b>「＋ 記録」から最初の一座を書き残しましょう。<br>短い一行でも、未来の本の一頁になります。</div>`;
     return;
   }
   list.innerHTML = items.map(e=>`
@@ -274,21 +426,61 @@ function renderList(){
       <div class="m">${esc(e.mt)}</div>
       <div class="meta">${esc(e.country)}${e.elev?` — ${e.elev.toLocaleString()} m`:''}</div>
       ${e.body?`<div class="ex">${esc(e.body)}</div>`:''}
+      ${(e.photos&&e.photos.length)?`<div class="thumbs" id="th-${e.id}"></div>`:''}
     </div>`).join('');
+  // lazy-load thumbnails
+  for(const e of items){
+    if(!(e.photos&&e.photos.length)) continue;
+    const box = document.getElementById('th-'+e.id); if(!box) continue;
+    for(const pid of e.photos.slice(0,3)){
+      const p = await dbGet(pid);
+      if(p){ const img = document.createElement('img'); img.src = p.data; box.appendChild(img); }
+    }
+  }
 }
-function showDetail(id){
+async function showDetail(id){
   const e = entries.find(x=>x.id===id); if(!e) return;
+  let photosHtml = '';
+  for(const pid of (e.photos||[])){
+    const p = await dbGet(pid);
+    if(p) photosHtml += `<img src="${p.data}">`;
+  }
   document.getElementById('sheet').innerHTML = `
     <div class="d">${fmtDate(e.date)}</div>
     <div class="m">${esc(e.mt)}</div>
     <div class="meta">${esc(e.country)}${e.elev?` — ${e.elev.toLocaleString()} m`:''}</div>
-    <div class="sub">${e.wx?`天候：${esc(e.wx)}<br>`:''}${e.party?`同行：${esc(e.party)}<br>`:''}${e.route?`行程：${esc(e.route)}`:''}</div>
-    <div class="body">${esc(e.body)||'（本文なし）'}</div>
+    <div class="sub">${e.wx?`天候:${esc(e.wx)}<br>`:''}${e.party?`同行:${esc(e.party)}<br>`:''}${e.route?`行程:${esc(e.route)}`:''}</div>
+    ${photosHtml?`<div class="photos">${photosHtml}</div>`:''}
+    <div class="body">${esc(e.body)||'(本文なし)'}</div>
     <button class="btn ghost" onclick="editEntry('${e.id}')">編集する</button>`;
   document.getElementById('modal').classList.add('on');
 }
 
-/* ---- export ---- */
+/* ================= map ================= */
+function initMap(){
+  if(!map){
+    map = L.map('map', {worldCopyJump:true}).setView([25,15], 2);
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom:17, attribution:'&copy; OpenStreetMap contributors'
+    }).addTo(map);
+    markerLayer = L.layerGroup().addTo(map);
+  }
+  markerLayer.clearLayers();
+  const pts = entries.filter(e=>e.lat!=null && e.lng!=null);
+  for(const e of pts){
+    const mk = L.circleMarker([e.lat,e.lng], {radius:8, color:'#E8A852', weight:2, fillColor:'#E8A852', fillOpacity:.75});
+    mk.bindPopup(`<b>${esc(e.mt)}</b><br>${fmtDate(e.date)}${e.elev?` / ${e.elev.toLocaleString()}m`:''}<br><u>記録を開く</u>`);
+    mk.on('popupopen', function(){ this.getPopup().getElement().onclick = ()=> showDetail(e.id); });
+    mk.addTo(markerLayer);
+  }
+  if(pts.length){
+    const b = L.latLngBounds(pts.map(e=>[e.lat,e.lng]));
+    map.fitBounds(b.pad(0.3), {maxZoom:6});
+  }
+  setTimeout(()=>map.invalidateSize(), 60);
+}
+
+/* ================= export ================= */
 function sorted(){ return [...entries].sort((a,b)=>a.date.localeCompare(b.date)); }
 function buildMd(){
   const items = sorted();
@@ -297,10 +489,10 @@ function buildMd(){
   for(const e of items){
     if(e.mt !== currentMt){
       currentMt = e.mt;
-      md += `\n## ${e.mt}${e.country?`（${e.country}${e.elev?` / ${e.elev.toLocaleString()}m`:''}）`:''}\n\n`;
+      md += `\n## ${e.mt}${e.country?`(${e.country}${e.elev?` / ${e.elev.toLocaleString()}m`:''})`:''}\n\n`;
     }
     md += `### ${fmtDate(e.date)}\n\n`;
-    const meta = [e.wx&&`天候：${e.wx}`, e.party&&`同行：${e.party}`, e.route&&`行程：${e.route}`].filter(Boolean).join(' ／ ');
+    const meta = [e.wx&&`天候:${e.wx}`, e.party&&`同行:${e.party}`, e.route&&`行程:${e.route}`].filter(Boolean).join(' / ');
     if(meta) md += `> ${meta}\n\n`;
     md += `${e.body||''}\n\n`;
   }
@@ -325,24 +517,49 @@ function fallbackDl(blob,name){
   document.body.appendChild(a); a.click(); a.remove();
   setTimeout(()=>URL.revokeObjectURL(a.href),5000);
 }
-function stamp(){ return new Date().toISOString().slice(0,10); }
 function exportMd(){ if(!entries.length)return toast('記録がありません'); download(`summit-log_${stamp()}.md`, buildMd(), 'text/markdown'); toast('原稿を書き出しました'); }
 function exportTxt(){ if(!entries.length)return toast('記録がありません'); download(`summit-log_${stamp()}.txt`, buildTxt(), 'text/plain'); toast('書き出しました'); }
 function copyMd(){
   if(!entries.length)return toast('記録がありません');
   navigator.clipboard.writeText(buildMd()).then(()=>toast('コピーしました')).catch(()=>toast('コピーできませんでした'));
 }
-function exportJson(){ download(`summit-log_backup_${stamp()}.json`, JSON.stringify(entries,null,2), 'application/json'); toast('バックアップを保存しました'); }
+
+/* ---- 縦書き印刷(PDF) ---- */
+function printBook(){
+  if(!entries.length) return toast('記録がありません');
+  const items = sorted();
+  let html = `<div class="bookpage"><h1>世界の山を歩く</h1><div class="author">中村紳一郎 遠征記録</div></div>`;
+  for(const e of items){
+    const meta = [e.country, e.elev?`${e.elev.toLocaleString()}m`:'', e.wx&&`天候 ${e.wx}`, e.party&&`同行 ${e.party}`, e.route].filter(Boolean).join(' / ');
+    html += `<div class="bookpage">
+      <h3>${esc(e.mt)}</h3>
+      <div class="bmeta">${fmtDate(e.date)}${meta?` — ${esc(meta)}`:''}</div>
+      <div class="bbody">${esc(e.body)||''}</div>
+    </div>`;
+  }
+  document.getElementById('book').innerHTML = html;
+  setTimeout(()=>window.print(), 100);
+}
+
+/* ---- backup (photos included) ---- */
+async function exportJson(){
+  const photos = await dbAll();
+  const payload = {version:2, exported:new Date().toISOString(), entries, photos};
+  download(`summit-log_backup_${stamp()}.json`, JSON.stringify(payload), 'application/json');
+  toast('バックアップを保存しました');
+}
 function importJson(ev){
   const f = ev.target.files[0]; if(!f) return;
   const r = new FileReader();
-  r.onload = ()=>{
+  r.onload = async ()=>{
     try{
       const data = JSON.parse(r.result);
-      if(!Array.isArray(data)) throw 0;
-      if(!confirm(`${data.length}件の記録を読み込みます。現在のデータと統合しますか？`)) return;
+      const inEntries = Array.isArray(data) ? data : (data.entries||[]);
+      const inPhotos  = Array.isArray(data) ? [] : (data.photos||[]);
+      if(!confirm(`${inEntries.length}件の記録を読み込みます。現在のデータと統合しますか?`)) return;
       const ids = new Set(entries.map(e=>e.id));
-      for(const e of data) if(e.id && !ids.has(e.id)) entries.push(e);
+      for(const e of inEntries) if(e.id && !ids.has(e.id)) entries.push(e);
+      for(const p of inPhotos) if(p.id && p.data) await dbPut(p);
       save(); renderList(); toast('復元しました');
     }catch{ toast('ファイルを読み込めませんでした'); }
   };
@@ -350,8 +567,11 @@ function importJson(ev){
   ev.target.value='';
 }
 
-/* ---- init ---- */
-clearForm(); renderStats(); renderList();
+/* ================= init ================= */
+openDb().then(()=>{ clearForm(); renderStats(); renderList(); });
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('sw.js').catch(()=>{});
+}
 </script>
 </body>
 </html>
